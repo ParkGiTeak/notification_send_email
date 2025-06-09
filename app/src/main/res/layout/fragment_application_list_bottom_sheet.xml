@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent"
+    android:paddingHorizontal="15dp">
+
+    <TextView
+        android:id="@+id/tv_application_list_bottom_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:text="ApplicationList"
+        android:textColor="@color/black"
+        android:textSize="35dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_installed_application_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@+id/tv_application_list_bottom_title"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="10dp" />
+
+</RelativeLayout>
