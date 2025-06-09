@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +16,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.notificationsendemail.databinding.ActivityMainBinding
 import com.example.notificationsendemail.service.NotiListenerService
 import com.example.notificationsendemail.util.GMailSender
+import com.example.notificationsendemail.util.PackageUtil
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -35,6 +37,10 @@ class MainActivity : AppCompatActivity() {
         if (checkPermission()) {
             binding.tvPermissionStatus.text = "PermissionGranted!"
             binding.btnRequestPermission.visibility = View.GONE
+            val installedPackageList = PackageUtil.getPackageList(this)
+            installedPackageList?.forEach {
+                Log.d("PGT", "PackageName:: ${it.appPackageName} / appLabel:: ${it.appLabelName} / appIco:: ${it.appIco}")
+            }
         } else {
             binding.tvPermissionStatus.text = "PermissionDenied!"
             binding.btnRequestPermission.apply {

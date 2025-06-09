@@ -4,6 +4,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- API 31 부터 타앱의 Package에 접근하기 위해 일일이 패키지명 쿼리를 추가해야 하는데 한번에 해결하기 위함 -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
