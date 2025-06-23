@@ -9,6 +9,7 @@ import com.example.notificationsendemail.model.AppInfoData
 class InstalledAppListAdapter :
     RecyclerView.Adapter<InstalledAppListAdapter.InstalledApplicationVH>() {
     private var itemList: MutableList<AppInfoData> = mutableListOf()
+    private var appItemClickListener: AppItemClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InstalledApplicationVH {
         val binding = ItemInstalledApplicationBinding.inflate(
@@ -35,6 +36,10 @@ class InstalledAppListAdapter :
         this.notifyDataSetChanged()
     }
 
+    fun setAppItemClickLister(listener: AppItemClickListener?) {
+        appItemClickListener = listener
+    }
+
     inner class InstalledApplicationVH(private val binding: ItemInstalledApplicationBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(position: Int) {
@@ -44,6 +49,19 @@ class InstalledAppListAdapter :
             itemList[position].appPackageName?.let {
                 binding.ivAppIcon.setImageDrawable(packageManager.getApplicationIcon(it))
             }
+            binding.root.setOnClickListener {
+                appItemClickListener?.onClickView(position)
+            }
+            binding.checkAppSelect.apply {
+                isChecked = itemList[position].appCheckState
+                setOnClickListener {
+                    binding.root.performClick()
+                }
+            }
         }
+    }
+
+    interface AppItemClickListener {
+        fun onClickView(position: Int)
     }
 }

@@ -77,6 +77,14 @@ class ApplicationListBottomSheetFragment : BottomSheetDialogFragment() {
                 this.addItemDecoration(ExcludeLastItemDividerDecoration(it))
             }
         }
-        mInstalledAppListAdapter?.setItemList(packageList)
+        mInstalledAppListAdapter?.apply {
+            setAppItemClickLister(object : InstalledAppListAdapter.AppItemClickListener {
+                override fun onClickView(position: Int) {
+                    packageList[position].appCheckState = !packageList[position].appCheckState
+                    notifyItemChanged(position)
+                }
+            })
+            setItemList(packageList)
+        }
     }
 }
