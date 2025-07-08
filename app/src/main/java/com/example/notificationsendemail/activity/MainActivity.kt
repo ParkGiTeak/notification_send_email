@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.notificationsendemail.databinding.ActivityMainBinding
 import com.example.notificationsendemail.datastore.appPrefDataStore
@@ -82,6 +83,9 @@ class MainActivity : AppCompatActivity() {
                 })
                 dialog.show()
             }
+
+            val intent = Intent(this@MainActivity, NotiListenerService::class.java)
+            ContextCompat.startForegroundService(this@MainActivity, intent)
         } else {
             binding.btnRequestPermission.apply {
                 visibility = View.VISIBLE

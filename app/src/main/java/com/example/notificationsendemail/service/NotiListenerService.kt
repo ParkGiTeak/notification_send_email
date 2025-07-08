@@ -1,11 +1,19 @@
 package com.example.notificationsendemail.service
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.example.notificationsendemail.BuildConfig
+import com.example.notificationsendemail.R
 import com.example.notificationsendemail.datastore.appPrefDataStore
 import com.example.notificationsendemail.datastore.getSavedEmail
+import com.example.notificationsendemail.datastore.getSavedPackageList
 import com.example.notificationsendemail.datastore.notiPacakgeDataStore
 import com.example.notificationsendemail.util.GMailSender
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +25,17 @@ import kotlinx.coroutines.launch
 class NotiListenerService : NotificationListenerService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var gMailSender: GMailSender? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        Log.d("PGT", "onCreate: notiListener")
+        val notification = createNotificationForForegroundService()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(100, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            startForeground(100, notification)
+        }
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
@@ -48,5 +67,21 @@ class NotiListenerService : NotificationListenerService() {
         super.onDestroy()
         serviceScope.cancel()
     }
+
+    private fun createNotificationForForegroundService(): Notification {
+        val channelId = "NotificationListenerChannel"
+        val channelName = "알림 감지 서비스"
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle("알림 감지 중")
+            .setContentText("백그라운드에서 알림을 감지하고 있습니다.")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .build()
     }
 }

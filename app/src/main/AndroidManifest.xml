@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- API 31 부터 타앱의 Package에 접근하기 위해 일일이 패키지명 쿼리를 추가해야 하는데 한번에 해결하기 위함 -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
@@ -31,6 +33,7 @@
             android:name=".service.NotiListenerService"
             android:enabled="true"
             android:exported="false"
+            android:foregroundServiceType="dataSync"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
