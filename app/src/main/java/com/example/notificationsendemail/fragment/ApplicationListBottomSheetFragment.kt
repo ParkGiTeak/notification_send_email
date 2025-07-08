@@ -12,7 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.notificationsendemail.R
 import com.example.notificationsendemail.adapter.InstalledAppListAdapter
 import com.example.notificationsendemail.databinding.FragmentApplicationListBottomSheetBinding
+import com.example.notificationsendemail.datastore.addPackageList
+import com.example.notificationsendemail.datastore.getSavedPackageList
 import com.example.notificationsendemail.datastore.notiPacakgeDataStore
+import com.example.notificationsendemail.datastore.removePackage
 import com.example.notificationsendemail.model.AppInfoData
 import com.example.notificationsendemail.util.ExcludeLastItemDividerDecoration
 import com.example.notificationsendemail.util.PackageUtil
@@ -89,22 +92,13 @@ class ApplicationListBottomSheetFragment : BottomSheetDialogFragment() {
                     installedAppInfoDatas[position].appCheckState = isChecked
 
                     lifecycleScope.launch {
-                        binding.root.context.notiPacakgeDataStore.updateData { currentPreference ->
-                            val builder = currentPreference.toBuilder()
-
+                        val notiPackageDataStore = binding.root.context.notiPacakgeDataStore
+                        installedAppInfoDatas[position].appPackageName?.let { currentSelectPackageName ->
                             if (isChecked) {
-                                builder.addPackage(installedAppInfoDatas[position].appPackageName)
+                                notiPackageDataStore.addPackageList(currentSelectPackageName)
                             } else {
-                                /*
-                                * ProtoBuf에서 repeat(List)는 단일 객체를 삭제하는 remove같은 메서드를 제공하지 않아서
-                                * 전체리스트에서 지울거 지우고 clear해주고 다시 더해줘야한다.
-                                */
-                                val currentPackageList = currentPreference.packageList.toMutableList()
-                                currentPackageList.remove(installedAppInfoDatas[position].appPackageName)
-                                builder.clearPackage()
-                                builder.addAllPackage(currentPackageList)
+                                notiPackageDataStore.removePackage(currentSelectPackageName)
                             }
-                            builder.build()
                         }
                     }
                     notifyItemChanged(position)
@@ -112,10 +106,10 @@ class ApplicationListBottomSheetFragment : BottomSheetDialogFragment() {
             })
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
-                    binding.root.context.notiPacakgeDataStore.data.collect { savePackages ->
+                    binding.root.context.notiPacakgeDataStore.getSavedPackageList().collect { savedPackageList ->
                         installedAppInfoDatas.map { appInfoData ->
                             appInfoData.appCheckState =
-                                savePackages.packageList.contains(appInfoData.appPackageName)
+                                savedPackageList.contains(appInfoData.appPackageName)
                         }
                     }
                 }

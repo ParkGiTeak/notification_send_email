@@ -46,6 +46,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     implementation "androidx.datastore:datastore:1.1.7"
+    implementation "androidx.datastore:datastore-preferences:1.1.7"
     implementation 'com.google.protobuf:protobuf-java:3.25.3'
     
     testImplementation 'junit:junit:4.13.2'
