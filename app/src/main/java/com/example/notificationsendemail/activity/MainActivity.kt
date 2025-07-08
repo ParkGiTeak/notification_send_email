@@ -3,24 +3,30 @@ package com.example.notificationsendemail.activity
 import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
+import android.widget.EditText
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.notificationsendemail.databinding.ActivityMainBinding
+import com.example.notificationsendemail.datastore.appPrefDataStore
+import com.example.notificationsendemail.datastore.saveEmail
 import com.example.notificationsendemail.fragment.ApplicationListBottomSheetFragment
 import com.example.notificationsendemail.service.NotiListenerService
-import com.example.notificationsendemail.util.GMailSender
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var requestNotificationListenerPermission: ActivityResultLauncher<Intent>
-    private var mGMailSender: GMailSender? = null
     private var mApplicationListBottomSheetFragment: ApplicationListBottomSheetFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,14 +37,12 @@ class MainActivity : AppCompatActivity() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 initWidgets()
             }
-        mGMailSender = GMailSender("userName", "password")
         initWidgets()
     }
 
     override fun onDestroy() {
         requestNotificationListenerPermission.unregister()
         super.onDestroy()
-        mGMailSender = null
         mApplicationListBottomSheetFragment = null
     }
 
@@ -46,17 +50,37 @@ class MainActivity : AppCompatActivity() {
         if (checkPermission()) {
             binding.tvPermissionStatus.visibility = View.GONE
             binding.btnRequestPermission.visibility = View.GONE
-            binding.btnRequestInstalledApplicationList.apply {
-                this.visibility = View.VISIBLE
-                this.setOnClickListener {
-                    if (mApplicationListBottomSheetFragment == null) {
-                        mApplicationListBottomSheetFragment = ApplicationListBottomSheetFragment()
-                    }
-                    mApplicationListBottomSheetFragment?.show(
-                        supportFragmentManager,
-                        "ApplicationListBottomSheetFragment"
-                    )
+
+            binding.layoutActiveApp.visibility = View.VISIBLE
+            binding.btnRequestInstalledApplicationList.setOnClickListener {
+                if (mApplicationListBottomSheetFragment == null) {
+                    mApplicationListBottomSheetFragment = ApplicationListBottomSheetFragment()
                 }
+                mApplicationListBottomSheetFragment?.show(
+                    supportFragmentManager,
+                    "ApplicationListBottomSheetFragment"
+                )
+            }
+            binding.btnRegisterEmail.setOnClickListener {
+                val editTextView = EditText(this@MainActivity)
+                editTextView.setHint("example@gmail.com")
+                val builder = AlertDialog.Builder(this@MainActivity)
+                val dialog = builder
+                    .setTitle("Email 등록")
+                    .setMessage("알림을 받을 Email을 입력하세요.")
+                    .setView(editTextView)
+                dialog.setPositiveButton("등록", object : DialogInterface.OnClickListener {
+                    override fun onClick(
+                        dialog: DialogInterface?,
+                        which: Int
+                    ) {
+                        lifecycleScope.launch {
+                            Log.d("PGT", "btnRegisterEmail onClick: ${editTextView.text}")
+                            appPrefDataStore.saveEmail(editTextView.text.toString())
+                        }
+                    }
+                })
+                dialog.show()
             }
         } else {
             binding.btnRequestPermission.apply {
@@ -82,9 +106,5 @@ class MainActivity : AppCompatActivity() {
             NotificationManagerCompat.getEnabledListenerPackages(applicationContext)
                 .contains(applicationContext.packageName)
         }
-    }
-
-    private fun sendMail() {
-        mGMailSender?.sendMail("rl980901@naver.com", "Title", "Content")
     }
 }
